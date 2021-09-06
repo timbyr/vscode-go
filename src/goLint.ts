@@ -122,6 +122,12 @@ export function goLint(
 			// message detection logic. See golang/vscode-go/issues/411
 			args.push('--issues-exit-code=0');
 		}
+		if (scope === 'package') {
+			// golangci.yml doesn't apply exclude-rules path rules unless run from workspace root
+			args.push(cwd)
+            // Reset cwd to currentWorkspace
+			cwd = currentWorkspace
+		}
 	}
 
 	if (scope === 'workspace' && currentWorkspace) {
@@ -133,7 +139,7 @@ export function goLint(
 	} else {
 		outputChannel.appendLine(`Starting linting the current package at ${cwd}`);
 	}
-
+	
 	running = true;
 	const lintPromise = runTool(args, cwd, 'warning', false, lintTool, lintEnv, false, tokenSource.token).then(
 		(result) => {
